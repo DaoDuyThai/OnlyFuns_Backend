@@ -1,5 +1,5 @@
 /** 
- * @des 
+ * @des Connect to the database
  * @author Trịnh Minh Phúc
  * @date 29/1/2024
  * @param {*} req
