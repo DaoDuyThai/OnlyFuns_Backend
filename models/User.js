@@ -40,7 +40,7 @@ const UserSchema = new Schema({
     },
     verificationCode: {
         type: String,
-        default: generateVerificationCode()
+        default: undefined
     },
 },
     { timestamps: true })

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 
+
 const listByPassURL = [
     '/login',
     '/register',
@@ -69,7 +70,7 @@ const checkToken = (req, res, next) => {
  * @author Trịnh Minh Phúc
  * @date 30/1/2024
  * @param {token , role} req
- * @param {} registerUser
+ * @param {} res
  * @returns 
  */
 const checkAuthorization = (req, res, next) => {

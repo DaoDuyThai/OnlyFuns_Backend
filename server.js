@@ -26,7 +26,7 @@ app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
 app.use(checkToken)
-app.use(checkAuthorization)
+// app.use(checkAuthorization)
 
 
 app.use(morgan('combined'))
