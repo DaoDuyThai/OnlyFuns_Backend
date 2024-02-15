@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import crypto from 'crypto'
-/** 
- * @des 
+import mongoose, { Schema } from "mongoose";
+import crypto from "crypto";
+/**
+ * @des
  * @author Trinh Minh Phuc
  * @date 29/1/2024
  * @param {*} req
@@ -9,40 +9,46 @@ import crypto from 'crypto'
  * @returns
  */
 const generateVerificationCode = () => {
-    return crypto.randomBytes(20).toString('hex');
-  };
-const Schema = mongoose.Schema;
-const UserSchema = new Schema({
+  return crypto.randomBytes(20).toString("hex");
+};
+const userSchema = new Schema(
+  {
     username: {
-        type: String,
-        require: true,
-        minlength: 6,
-        maxlength: 30,
-        unique: true
+      type: String,
+      require: true,
+      minlength: 6,
+      maxlength: 30,
+      unique: true,
     },
     email: {
-        type: String,
-        require: true,
-        unique: true
+      type: String,
+      require: true,
+      unique: true,
     },
     password: {
-        type: String,
-        require: true,
-        minlength: 6,
+      type: String,
+      require: true,
+      minlength: 6,
     },
     role: {
-        type: Number,
-        default: 1
+      type: Number,
+      default: 1,
     },
     isVerified: {
-        type: Boolean,
-        default: false,
+      type: Boolean,
+      default: false,
     },
+    //token
     verificationCode: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined,
     },
-},
-    { timestamps: true })
-const User = mongoose.model('User', UserSchema);
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
+const User = mongoose.model("User", userSchema);
 export default User;
