@@ -18,8 +18,11 @@ const userProfileSchema = new Schema(
     },
     fullName: {
       type: String,
-      minlength: 6,
       required: true,
+      validate: {
+        validator: (value) => value.length > 6,
+        message: 'Fullname must be at least 6 charaters!'
+    }
     },
     profilePictureUrl: {
       type: String,
@@ -39,6 +42,7 @@ const userProfileSchema = new Schema(
         },
         status: {
           type: String,
+          default: "pending"
         },
       },
     ],

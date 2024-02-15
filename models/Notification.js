@@ -16,31 +16,31 @@ const notificationSchema = new Schema(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: true
     },
     type: {
       type: String,
-      required: true,
+      required: true
     },
     content: {
       type: String,
-      required: true,
+      required: true
     },
     messageList: {
       type: Schema.Types.ObjectId,
-      ref: "MessageList",
+      ref: "MessageList"
     },
     message: {
       type: Schema.Types.ObjectId,
-      ref: "Message",
+      ref: "Message"
     },
     post: {
       type: Schema.Types.ObjectId,
-      ref: "Post",
-    },
+      ref: "Post"
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

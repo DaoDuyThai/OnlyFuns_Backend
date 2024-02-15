@@ -11,31 +11,37 @@ const bannerSchema = new Schema(
   {
     contents: {
       type: String,
-      required: true,
+      required: true
     },
     description: {
       type: String,
-      required: true,
+      required: true
     },
     dateStart: {
       type: Date,
-      required: true,
+      required: true
     },
     dateEnd: {
       type: Date,
       required: true,
+      validate: {
+        validator: function (value) {
+          return this.dateStart < value;
+        },
+        message: "dateEnd must be after dateStart",
+      }
     },
     pictureUrl: {
       type: String,
-      required: true,
+      required: true
     },
     redirectUrl: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

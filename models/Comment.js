@@ -14,24 +14,24 @@ const commentSchema = new Schema(
     post: {
       type: Schema.Types.ObjectId,
       ref: "Post",
-      required: true,
+      required: true
     },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: true
     },
     content: {
       type: String,
-      required: true,
+      required: true
     },
     timestamp: {
       type: Date,
-      default: Date.now,
-    },
+      default: Date.now
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

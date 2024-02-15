@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import crypto from "crypto";
+import isEmail from "validator/lib/isEmail.js";
 /**
  * @des
  * @author Trinh Minh Phuc
@@ -15,38 +16,44 @@ const userSchema = new Schema(
   {
     username: {
       type: String,
-      require: true,
-      minlength: 6,
-      maxlength: 30,
+      required: true,
       unique: true,
+      validate: {
+        validator: (value) => value.length > 6 && value.length < 30,
+        message: 'Username must be form 6 to 30 charaters!'
+    }
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
+      validate: {
+        validator: (value) => isEmail,
+        message: "Email is incorrect format!"
+      }
     },
     password: {
       type: String,
-      require: true,
-      minlength: 6,
+      required: true,
+      minlength: 6
     },
     role: {
       type: Number,
-      default: 1,
+      default: 1
     },
     isVerified: {
       type: Boolean,
-      default: false,
+      default: false
     },
     //token
     verificationCode: {
       type: String,
-      default: undefined,
+      default: undefined
     },
     isActive: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   { timestamps: true }
 );

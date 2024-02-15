@@ -14,24 +14,24 @@ const messageListSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: true,
+        required: true
       },
     ],
     lastMessage: [
       {
         content: {
           type: String,
-          required: true,
+          required: true
         },
         timestamp: {
           type: Date,
-          required: true,
+          required: true
         },
       },
-    ],
+    ]
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

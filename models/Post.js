@@ -13,29 +13,29 @@ const postSchema = new Schema(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: true
     },
     content: {
       type: String,
-      required: true,
+      required: true
     },
     image: {
-      type: String,
+      type: String
     },
     timestamp: {
       type: Date,
-      default: Date.now,
+      default: Date.now
     },
     likes: [
       {
         user: {
           type: Schema.Types.ObjectId,
           ref: "User",
-          required: true,
+          required: true
         },
         timestamp: {
           type: Date,
-          default: Date.now,
+          default: Date.now
         },
       },
     ],
@@ -44,25 +44,26 @@ const postSchema = new Schema(
         user: {
           type: Schema.Types.ObjectId,
           ref: "User",
-          required: true,
+          required: true
         },
         reason: {
           type: String,
-          required: true,
+          required: true
         },
         timestamp: {
           type: Date,
-          default: Date.now,
+          default: Date.now
         },
       },
     ],
     status: {
       type: String,
       required: true,
-    },
+      default: "public"
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 
