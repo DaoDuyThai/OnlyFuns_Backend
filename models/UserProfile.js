@@ -3,8 +3,8 @@ import User from "./User.js";
 import Post from "./Post.js";
 /**
  * @des
- * @author
- * @date
+ * @author Bui Anh Hong
+ * @date 15/2/2024
  * @param {*} req
  * @param {*} res
  * @returns
