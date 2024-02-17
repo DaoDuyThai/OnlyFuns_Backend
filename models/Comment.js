@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import MessageList from "./MessageList.js";
+import User from "./User.js";
+import Post from "./Post.js";
 /**
  * @des
  * @author Bui Anh Hong
@@ -8,11 +9,16 @@ import MessageList from "./MessageList.js";
  * @param {*} res
  * @returns
  */
-const messageSchema = new Schema(
+const commentSchema = new Schema(
   {
-    messageList: {
+    post: {
       type: Schema.Types.ObjectId,
-      ref: "MessageList",
+      ref: "Post",
+      required: true
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true
     },
     content: {
@@ -22,14 +28,6 @@ const messageSchema = new Schema(
     timestamp: {
       type: Date,
       default: Date.now
-    },
-    sender: {
-      type: String,
-      required: true
-    },
-    read: {
-      type: Boolean,
-      default: false
     }
   },
   {
@@ -37,5 +35,5 @@ const messageSchema = new Schema(
   }
 );
 
-const Message = mongoose.model("Message", messageSchema);
-export default Message;
+const Comment = mongoose.model("Comment", commentSchema);
+export default Comment;
