@@ -13,7 +13,7 @@ import Post from "./Post.js"
  */
 const notificationSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -26,15 +26,15 @@ const notificationSchema = new Schema(
       type: String,
       required: true
     },
-    messageList: {
+    messageListId: {
       type: Schema.Types.ObjectId,
       ref: "MessageList"
     },
-    message: {
+    messageId: {
       type: Schema.Types.ObjectId,
       ref: "Message"
     },
-    post: {
+    postId: {
       type: Schema.Types.ObjectId,
       ref: "Post"
     }

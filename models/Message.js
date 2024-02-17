@@ -10,7 +10,7 @@ import MessageList from "./MessageList.js";
  */
 const messageSchema = new Schema(
   {
-    messageList: {
+    messageListId: {
       type: Schema.Types.ObjectId,
       ref: "MessageList",
       required: true

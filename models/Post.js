@@ -10,7 +10,7 @@ import User from "./User.js";
  */
 const postSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
@@ -28,7 +28,7 @@ const postSchema = new Schema(
     },
     likes: [
       {
-        user: {
+        userId: {
           type: Schema.Types.ObjectId,
           ref: "User",
           required: true
@@ -41,7 +41,7 @@ const postSchema = new Schema(
     ],
     report: [
       {
-        user: {
+        userId: {
           type: Schema.Types.ObjectId,
           ref: "User",
           required: true

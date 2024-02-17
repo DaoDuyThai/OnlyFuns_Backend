@@ -11,7 +11,7 @@ import Post from "./Post.js";
  */
 const userProfileSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -35,7 +35,7 @@ const userProfileSchema = new Schema(
     },
     connections: [
       {
-        user: {
+        userId: {
           type: Schema.Types.ObjectId,
           ref: "User",
           required: true,
