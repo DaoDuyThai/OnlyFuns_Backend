@@ -35,7 +35,7 @@ const userProfileSchema = new Schema(
     },
     connections: [
       {
-        user: {
+        userId: {
           type: Schema.Types.ObjectId,
           ref: "User",
           required: true,
