@@ -10,7 +10,7 @@ import User from "./User.js";
  */
 const postSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
