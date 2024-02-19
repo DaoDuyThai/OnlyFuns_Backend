@@ -17,11 +17,10 @@ const userSchema = new Schema(
     username: {
       type: String,
       required: true,
-      unique: true,
-      validate: {
-        validator: (value) => value.length > 6 && value.length < 30,
-        message: 'Username must be form 6 to 30 charaters!'
-    }
+      trim: true,
+      validate(value){
+        if(value.length < 6 || value.length > 30) throw new Error("Username must be form 6 to 30 charaters!");
+      }
     },
     email: {
       type: String,
@@ -35,7 +34,9 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6
+      validate(value){
+        if(value.length < 6) throw new Error("Password must be greater than or equal six!");
+      }
     },
     role: {
       type: Number,

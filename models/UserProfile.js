@@ -9,6 +9,21 @@ import Post from "./Post.js";
  * @param {*} res
  * @returns
  */
+const connectionSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User"
+    },
+    status: {
+      type: String,
+      default: "pending",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 const userProfileSchema = new Schema(
   {
     userId: {
@@ -19,10 +34,13 @@ const userProfileSchema = new Schema(
     fullName: {
       type: String,
       required: true,
-      validate: {
-        validator: (value) => value.length > 6,
-        message: 'Fullname must be at least 6 charaters!'
-    }
+      trim: true,
+      validate(value) {
+        if (value.length < 6)
+          throw new Error(
+            "Full name must be greater than or equal six characters!"
+          );
+      },
     },
     profilePictureUrl: {
       type: String,
@@ -33,19 +51,7 @@ const userProfileSchema = new Schema(
     bio: {
       type: String,
     },
-    connections: [
-      {
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        status: {
-          type: String,
-          default: "pending"
-        },
-      },
-    ],
+    connections: [connectionSchema],
     posts: [
       {
         type: Schema.Types.ObjectId,

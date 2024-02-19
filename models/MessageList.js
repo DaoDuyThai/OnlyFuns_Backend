@@ -8,6 +8,17 @@ import User from "./User.js";
  * @param {*} res
  * @returns
  */
+const lastMessageSchema = new Schema(
+  {
+    content: {
+      type: String
+    },
+  },
+  {
+    timestamps: true
+  }
+);
+
 const messageListSchema = new Schema(
   {
     participants: [
@@ -17,18 +28,7 @@ const messageListSchema = new Schema(
         required: true
       },
     ],
-    lastMessage: [
-      {
-        content: {
-          type: String,
-          required: true
-        },
-        timestamp: {
-          type: Date,
-          required: true
-        },
-      },
-    ]
+    lastMessage:[lastMessageSchema],
   },
   {
     timestamps: true

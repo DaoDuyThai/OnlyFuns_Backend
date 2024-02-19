@@ -8,59 +8,51 @@ import User from "./User.js";
  * @param {*} res
  * @returns
  */
+const likeSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User"
+    }
+  },
+  {
+    timestamps: true,
+  }
+);
+const repostSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User"
+    },
+    reason: {
+      type: String
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 const postSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
     },
     content: {
       type: String,
-      required: true
+      required: true,
     },
     image: {
-      type: String
+      type: String,
     },
-    timestamp: {
-      type: Date,
-      default: Date.now
-    },
-    likes: [
-      {
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-          required: true
-        },
-        timestamp: {
-          type: Date,
-          default: Date.now
-        },
-      },
-    ],
-    report: [
-      {
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-          required: true
-        },
-        reason: {
-          type: String,
-          required: true
-        },
-        timestamp: {
-          type: Date,
-          default: Date.now
-        },
-      },
-    ],
+    likes: [likeSchema],
+    report: [repostSchema],
     status: {
       type: String,
-      required: true,
-      default: "public"
-    }
+      default: "public",
+    },
   },
   {
     timestamps: true

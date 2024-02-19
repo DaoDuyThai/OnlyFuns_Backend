@@ -11,6 +11,7 @@ const bannerSchema = new Schema(
   {
     contents: {
       type: String,
+      trim: true,
       required: true
     },
     description: {
@@ -24,11 +25,8 @@ const bannerSchema = new Schema(
     dateEnd: {
       type: Date,
       required: true,
-      validate: {
-        validator: function (value) {
-          return this.dateStart < value;
-        },
-        message: "dateEnd must be after dateStart",
+      validate(value){
+        if(this.dateStart < value) throw new Error("dateEnd must be after dateStart");
       }
     },
     pictureUrl: {
