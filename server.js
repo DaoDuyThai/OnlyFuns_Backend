@@ -6,6 +6,8 @@ import { authRouter,userRouter } from './route/index.js';
 import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
+import cookieParser from'cookie-parser';
+
 /** 
  * @des 
  * @author Trịnh Minh Phúc
@@ -23,9 +25,10 @@ const port = process.env.PORT || 8080;
 connectDB();
 // Enable middleware that allows the Express server to work with JSON data
 app.use(json());
+app.use(cookieParser());
 
 // Middleware để kiểm soát mọi request đi đến express server
-app.use(checkToken)
+
 // app.use(checkAuthorization)
 
 
@@ -38,6 +41,7 @@ app.use(
       credentials: true, 
     })
   );
+app.use(checkToken)
 // Router
 app.use("/", authRouter)
 app.use("/user", userRouter)

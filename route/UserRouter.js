@@ -5,8 +5,8 @@ import { checkAuthorization } from '../middleware/Auth.js';
 
 const userRouter = express.Router();
 
-userRouter.get('/',checkAuthorization,userController.getAllUser);
+userRouter.get('/', checkAuthorization, userController.getAllUser);
 
 
 
-export default  userRouter ;
+export default userRouter;

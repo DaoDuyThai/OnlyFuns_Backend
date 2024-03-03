@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
-import crypto from 'crypto'
-/** 
- * @des 
+import mongoose, { Schema } from "mongoose";
+import crypto from "crypto";
+import isEmail from "validator/lib/isEmail.js";
+/**
+ * @des
  * @author Trinh Minh Phuc
  * @date 29/1/2024
  * @param {*} req
@@ -9,40 +10,56 @@ import crypto from 'crypto'
  * @returns
  */
 const generateVerificationCode = () => {
-    return crypto.randomBytes(20).toString('hex');
-  };
-const Schema = mongoose.Schema;
-const UserSchema = new Schema({
+  return crypto.randomBytes(20).toString("hex");
+};
+const userSchema = new Schema(
+  {
     username: {
-        type: String,
-        require: true,
-        minlength: 6,
-        maxlength: 30,
-        unique: true
+      type: String,
+      required: true,
+      trim: true,
+      validate(value){
+        if(value.length < 6 || value.length > 30) throw new Error("Username must be form 6 to 30 charaters!");
+      }
     },
     email: {
-        type: String,
-        require: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator: (value) => isEmail,
+        message: "Email is incorrect format!"
+      }
     },
     password: {
-        type: String,
-        require: true,
-        minlength: 6,
+      type: String,
+      required: true,
+      validate(value){
+        if(value.length < 6) throw new Error("Password must be greater than or equal six!");
+      }
     },
     role: {
-        type: Number,
-        default: 1
+      type: Number,
+      default: 1
     },
     isVerified: {
-        type: Boolean,
-        default: false,
+      type: Boolean,
+      default: false
     },
-    verificationCode: {
-        type: String,
+    token :{
+        type:String,
         default: undefined
     },
-},
-    { timestamps: true })
-const User = mongoose.model('User', UserSchema);
+    verificationCode: {
+      type: String,
+      default: undefined
+    },
+    active: {
+      type: Boolean,
+      default: true
+    }
+  },
+  { timestamps: true }
+);
+const User = mongoose.model("User", userSchema);
 export default User;

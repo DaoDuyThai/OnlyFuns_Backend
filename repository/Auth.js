@@ -5,7 +5,12 @@ import crypto from 'crypto'
 import jwt from 'jsonwebtoken';
 
 
-
+/**
+ * Generates a verification code using crypto.randomBytes.
+ * @author Trịnh Minh Phúc
+ * @date 29/1/2024
+ * @return {string} The generated verification code in hexadecimal format.
+ */
 const generateVerificationCode = () => {
     return crypto.randomBytes(20).toString('hex');
 };
@@ -16,25 +21,30 @@ const transporter = nodemailer.createTransport({
         pass: "kfqbavvazdgyysmd",
     },
 });
-
-
+/**
+ * Sends a verification email to the specified email address with the given verification code.
+ * @author Trịnh Minh Phúc
+ * @date 29/1/2024
+ * @param {string} email - The email address to which the verification email will be sent
+ * @param {string} verificationCode - The code used to verify the email address
+ * @return {Promise} A promise that resolves to the information about the sent email
+ */
 const sendVerificationEmail = async (email, verificationCode) => {
     const mailOptions = {
-        from: "trinhphuc980@gmail.com",
+        from: 'trinhphuc980@gmail.com',
         to: email,
         subject: 'Xác Minh Tài Khoản',
-        html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:9999/verify/${verificationCode}">Xác Minh</a></p>`,
+        html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
     };
 
-    return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(info);
-            }
-        });
-    });
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
+        return info;
+    } catch (error) {
+        console.error('Error sending email: ', error);
+        throw error;
+    }
 };
 /** 
  * @des Register an account
@@ -48,11 +58,11 @@ const registerUser = async (username, email, password) => {
     try {
         const existingUser = await User.findOne({ username }).exec();
         if (existingUser) {
-            return { error: 'Tên người dùng tồn tại', status: 404 };
+            return { error: 'Username exists', status: 404 };
         }
         const existingEmail = await User.findOne({ email }).exec();
         if (existingEmail) {
-            return { error: 'Email người dùng tồn tại', status: 404 };
+            return { error: 'Email exists', status: 404 };
         }
         const salt = await bcrypt.genSalt(10);
         const hashed = await bcrypt.hash(password, salt);
@@ -73,15 +83,28 @@ const registerUser = async (username, email, password) => {
         throw new Error(error.toString());
     }
 };
+/**
+ * Generates an access token for the given user.
+ * @author Trịnh Minh Phúc
+ * @date 29/1/2024
+ * @param {Object} user - The user object containing the user's id and role.
+ * @return {string} The generated access token.
+ */
 const genAccessToken = (user) => {
     const token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_ACCESS_KEY,
-        { expiresIn: "60s" }
+        { expiresIn: "2d" }
     );
     return token;
 };
-
+/**
+ * Generates a reference token for a user.
+* @author Trịnh Minh Phúc
+ * @date 29/1/2024
+ * @param {Object} user - the user object
+ * @return {string} the generated reference token
+ */
 const genRefToken = (user) => {
     const token = jwt.sign(
         { id: user.id, role: user.role },
@@ -99,7 +122,7 @@ const genRefToken = (user) => {
  * @param {*} res
  * @returns 
  */
-const loginUser = async (username, password) => {
+const loginUser = async (username, password, res) => {
     try {
         const user = await User.findOne({ username }).exec();
         if (!user) {
@@ -109,20 +132,32 @@ const loginUser = async (username, password) => {
         if (!user.isVerified) {
             return { error: `Account is not verified.`, status: 400 };
         }
+        if (!user.active) {
+            return { error: `The account has been banned`, status: 403 };
+        }
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
             return { error: `Wrong Password`, status: 401 };
         } else {
-            const token = genAccessToken(user);
+            const accessToken = genAccessToken(user);
             const refToken = genRefToken(user);
-            const { password, role, _id, ...info } = user.toObject();
-            return { message: "Login successful", info, token, refToken };
+            res.cookie("refToken", refToken, {
+                httpOnly: true,
+                secure: false,
+                path: "/",
+                sameSite: "strict",
+            });
+            user.token = refToken;
+            await user.save();
+            const { password, role, _id, token, ...info } = user.toObject();
+            return { message: "Login successful", info, accessToken };
         }
     } catch (error) {
         throw new Error(error.toString());
     }
 };
+
 
 /** 
  * @des Account authentication
@@ -141,14 +176,55 @@ const verifyUser = async (verificationCode) => {
         user.isVerified = true;
         user.verificationCode = undefined;
         await user.save();
-        return { success: true, message: 'Xac minh thanh cong' };
+        return { success: true, message: 'Verification Successful!' };
     } catch (error) {
         throw new Error(error.toString());
     }
 }
+/**
+ * Verify the refresh token and generate a new access token.
+ *
+ * @param {string} refreshToken - The refresh token to be verified.
+ * @return {string|object} The new access token if the refresh token is valid, or an error object.
+ */
+const verifyRefreshToken = async (refreshToken) => {
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user || user.token !== refreshToken) {
+            return { error: `Ma refToken khong hop le`, status: 404 };
+        }
+        const newAccessToken = genAccessToken(user);
+        return {accessToken:newAccessToken};
+    } catch (error) {
+        throw new Error("Mã refresh token không hợp lệ");
+    }
+};
+
+const logout = async (refreshToken) => {
+    try {
+        if (!refreshToken) {
+            return false; 
+        }
+        
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return false;
+        }
+        
+        user.token = undefined;
+        await user.save();
+        return true;
+    } catch (error) {
+        console.error("Error in logout:", error);
+        return false; 
+    }
+};
 
 
 
 
-
-export default { registerUser, genAccessToken, genRefToken, loginUser,verifyUser }
+export default { registerUser, genAccessToken, genRefToken, loginUser, verifyUser, verifyRefreshToken , logout}
