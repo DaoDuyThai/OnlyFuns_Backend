@@ -4,9 +4,11 @@ import { authController } from '../controllers/index.js';
 const authRouter = express.Router();
 
 authRouter.post('/register', authController.registerUser);
-
+authRouter.post('/refresh', authController.verifyRefreshToken);
 authRouter.post('/login', authController.loginUser);
-authRouter.get('/verify/:verificationCode', authController.verifyUser);
+authRouter.post('/logout', authController.logout);
+authRouter.post('/verify', authController.verifyUser);
+authRouter.post('/forgot', authController.forgotPassword);
 
 
 export default  authRouter ;

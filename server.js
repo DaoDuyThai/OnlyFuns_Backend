@@ -29,7 +29,7 @@ connectDB();
 app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
-// app.use(checkToken); //Todo: Enable in production
+app.use(checkToken);
 // app.use(checkAuthorization)
 
 app.use(morgan('combined'));
@@ -41,6 +41,7 @@ app.use(
     credentials: true,
   }),
 );
+app.use(cookieParser());
 // Router
 app.use('/', authRouter);
 app.use('/user', userRouter);
