@@ -1,20 +1,24 @@
 import express, { json } from 'express';
 import * as dotenv from 'dotenv';
 import connectDB from './connection/DBConnection.js';
-import cors from "cors"
-import { authRouter,userRouter } from './route/index.js';
+import cors from 'cors';
+import {
+  authRouter,
+  userRouter,
+  dashBoardRouter,
+  postRouter,
+} from './route/index.js';
 import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
-/** 
- * @des 
+/**
+ * @des
  * @author Trịnh Minh Phúc
  * @date 29/01/2024
  * @param {*} req
  * @param {*} res
  * @returns
  */
-
 
 dotenv.config();
 //Create 1 webserver
@@ -25,23 +29,23 @@ connectDB();
 app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
-app.use(checkToken)
+// app.use(checkToken); //Todo: Enable in production
 // app.use(checkAuthorization)
 
-
-app.use(morgan('combined'))
+app.use(morgan('combined'));
 // Cấu hình sever chỉ cho client chạy trên Port:3000
 app.use(
-    cors({
-      origin: process.env.CLIENT,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      credentials: true, 
-    })
-  );
+  cors({
+    origin: process.env.CLIENT,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  }),
+);
 // Router
-app.use("/", authRouter)
-app.use("/user", userRouter)
-
+app.use('/', authRouter);
+app.use('/user', userRouter);
+app.use('/dash-board', dashBoardRouter);
+app.use('/post', postRouter);
 app.listen(port, async () => {
-  console.log("Server node Js running on " + port);
+  console.log('Server node Js running on ' + port);
 });

@@ -30,5 +30,8 @@
     "nodemailer": "^6.9.8",
     "nodemon": "^3.0.3",
     "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
   }
 }

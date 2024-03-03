@@ -13,22 +13,22 @@ const connectionSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User"
+      ref: 'User',
     },
     status: {
       type: String,
-      default: "pending",
+      default: 'pending',
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 const userProfileSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     fullName: {
@@ -38,7 +38,7 @@ const userProfileSchema = new Schema(
       validate(value) {
         if (value.length < 6)
           throw new Error(
-            "Full name must be greater than or equal six characters!"
+            'Full name must be greater than or equal six characters!',
           );
       },
     },
@@ -55,13 +55,13 @@ const userProfileSchema = new Schema(
     posts: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Post",
+        ref: 'Post',
       },
     ],
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const UserProfile = mongoose.model("UserProfile", userProfileSchema);
