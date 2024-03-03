@@ -25,7 +25,7 @@ const port = process.env.PORT || 8080;
 app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
-app.use(checkToken)
+// app.use(checkToken)
 // app.use(checkAuthorization)
 
 
