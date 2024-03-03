@@ -36,9 +36,9 @@ const getUserForLast7Days = async (req, res) => {
   // The date 6 days ago
   const dayAgo = startDate.getDate() - 6;
   try {
-    // Find users who have joined between 6 days ago and now, select only the username, email, and joinDate fields
+    // Find users who have joined between 7 days ago and now, select only the username, email, and joinDate fields
     const result = await User.find(
-      { joinDate: { $gte: dayAgo, $lt: startDate } },
+      { joinDate: { $gte: dayAgo, $lte: startDate } },
       'username email joinDate',
       null,
     );
