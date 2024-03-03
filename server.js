@@ -2,7 +2,13 @@ import express, { json } from 'express';
 import * as dotenv from 'dotenv';
 import connectDB from './connection/DBConnection.js';
 import cors from 'cors';
-import { authRouter, userRouter } from './route/index.js';
+import {
+  authRouter,
+  userRouter,
+  dashBoardRouter,
+  postRouter,
+  userProfileRouter,
+} from './route/index.js';
 import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
@@ -36,7 +42,7 @@ app.use(cookieParser());
 
 app.use(morgan('combined'));
 
-app.use(checkToken);
+// app.use(checkToken);
 // Router
 app.use('/', authRouter);
 app.use('/user', userRouter);
