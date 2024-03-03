@@ -14,6 +14,10 @@ import jwt from 'jsonwebtoken';
 const generateVerificationCode = () => {
     return crypto.randomBytes(20).toString('hex');
 };
+const generateNewPassword = () => {
+    return crypto.randomBytes(3).toString('hex');
+};
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -29,6 +33,24 @@ const sendVerificationEmail = async (email, verificationCode) => {
         to: email,
         subject: 'Xác Minh Tài Khoản',
         html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
+    };
+
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(info);
+            }
+        });
+    });
+};
+const sendForgotPasswordEmail = async (email, password) => {
+    const mailOptions = {
+        from: "trinhphuc980@gmail.com",
+        to: email,
+        subject: 'Xác Minh Tài Khoản',
+        html: `<p>Mật khẩu của bạn là : ${password}</p>`,
     };
 
     return new Promise((resolve, reject) => {
@@ -188,7 +210,7 @@ const verifyRefreshToken = async (refreshToken) => {
             return { error: `Ma refToken khong hop le`, status: 404 };
         }
         const newAccessToken = genAccessToken(user);
-        return {accessToken:newAccessToken};
+        return { accessToken: newAccessToken };
     } catch (error) {
         throw new Error("Mã refresh token không hợp lệ");
     }
@@ -202,27 +224,51 @@ const verifyRefreshToken = async (refreshToken) => {
 const logout = async (refreshToken) => {
     try {
         if (!refreshToken) {
-            return false; 
+            return false;
         }
-        
+
         const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
         const userId = decoded.id;
         const user = await User.findById(userId);
         if (!user) {
             return false;
         }
-        
+
         user.token = undefined;
         await user.save();
         return true;
     } catch (error) {
         console.error("Error in logout:", error);
-        return false; 
+        return false;
     }
 };
+const forgotPassword = async (email) => {
+    try {
+        const user = await User.findOne({ email }).exec();
+        if (!user) {
+            return { error: `Không tìm thấy email`, status: 404 };
+        }
+        if (!user.isVerified) {
+            return { error: `Account is not verified.`, status: 400 };
+        }
+        if (!user.active) {
+            return { error: `The account has been banned`, status: 403 };
+        }
+        const newpass =generateNewPassword();
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(newpass, salt);
+        user.password = hashed;
+        await user.save();
+        await sendForgotPasswordEmail(user.email, newpass);
+        return { message: 'Forgot password successful. Please check your email for new password' };
+
+
+    } catch (error) {
+        throw new Error(error.toString());
+    }
+}
 
 
 
 
-
-export default { registerUser, genAccessToken, genRefToken, loginUser,verifyUser }
+export default { registerUser, genAccessToken, genRefToken, loginUser, verifyUser, verifyRefreshToken, logout,forgotPassword }

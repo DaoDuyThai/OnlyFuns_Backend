@@ -22,23 +22,21 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 8080;
 connectDB();
+app.use(
+  cors({
+    origin: process.env.CLIENT,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, 
+  })
+);
 // Enable middleware that allows the Express server to work with JSON data
 app.use(json());
-
-// Middleware để kiểm soát mọi request đi đến express server
 app.use(cookieParser());
 
 // app.use(checkAuthorization)
 
 app.use(morgan('combined'))
-// Cấu hình sever chỉ cho client chạy trên Port:3000
-app.use(
-    cors({
-      origin: process.env.CLIENT,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      credentials: true, 
-    })
-  );
+
 app.use(checkToken)
 // Router
 app.use("/", authRouter)
