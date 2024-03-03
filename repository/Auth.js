@@ -5,7 +5,12 @@ import crypto from 'crypto'
 import jwt from 'jsonwebtoken';
 
 
-
+/**
+ * Generates a verification code using crypto.randomBytes.
+ * @author Trịnh Minh Phúc
+ * @date 29/1/2024
+ * @return {string} The generated verification code in hexadecimal format.
+ */
 const generateVerificationCode = () => {
     return crypto.randomBytes(20).toString('hex');
 };
@@ -23,7 +28,7 @@ const sendVerificationEmail = async (email, verificationCode) => {
         from: "trinhphuc980@gmail.com",
         to: email,
         subject: 'Xác Minh Tài Khoản',
-        html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:9999/verify/${verificationCode}">Xác Minh</a></p>`,
+        html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
     };
 
     return new Promise((resolve, reject) => {
@@ -73,6 +78,12 @@ const registerUser = async (username, email, password) => {
         throw new Error(error.toString());
     }
 };
+/**
+ * Generates an access token for the given user.
+ *
+ * @param {Object} user - The user object containing id and role.
+ * @return {string} The generated access token.
+ */
 const genAccessToken = (user) => {
     const token = jwt.sign(
         { id: user.id, role: user.role },
@@ -81,7 +92,12 @@ const genAccessToken = (user) => {
     );
     return token;
 };
-
+/**
+ * Generates a reference token for the given user.
+ *
+ * @param {Object} user - The user object
+ * @return {string} The generated reference token
+ */
 const genRefToken = (user) => {
     const token = jwt.sign(
         { id: user.id, role: user.role },
@@ -99,7 +115,7 @@ const genRefToken = (user) => {
  * @param {*} res
  * @returns 
  */
-const loginUser = async (username, password) => {
+const loginUser = async (username, password, res) => {
     try {
         const user = await User.findOne({ username }).exec();
         if (!user) {
@@ -109,15 +125,26 @@ const loginUser = async (username, password) => {
         if (!user.isVerified) {
             return { error: `Account is not verified.`, status: 400 };
         }
+        if (!user.active) {
+            return { error: `The account has been banned`, status: 403 };
+        }
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
             return { error: `Wrong Password`, status: 401 };
         } else {
-            const token = genAccessToken(user);
+            const accessToken = genAccessToken(user);
             const refToken = genRefToken(user);
-            const { password, role, _id, ...info } = user.toObject();
-            return { message: "Login successful", info, token, refToken };
+            res.cookie("refToken", refToken, {
+                httpOnly: true,
+                secure: false,
+                path: "/",
+                sameSite: "strict",
+            });
+            user.token = refToken;
+            await user.save();
+            const { password, role, _id, token, ...info } = user.toObject();
+            return { message: "Login successful", info, accessToken };
         }
     } catch (error) {
         throw new Error(error.toString());
@@ -146,6 +173,53 @@ const verifyUser = async (verificationCode) => {
         throw new Error(error.toString());
     }
 }
+/**
+ * Verifies the refresh token and returns a new access token.
+ *
+ * @param {string} refreshToken - The refresh token to verify
+ * @return {Object} An object containing the new access token
+ */
+const verifyRefreshToken = async (refreshToken) => {
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user || user.token !== refreshToken) {
+            return { error: `Ma refToken khong hop le`, status: 404 };
+        }
+        const newAccessToken = genAccessToken(user);
+        return {accessToken:newAccessToken};
+    } catch (error) {
+        throw new Error("Mã refresh token không hợp lệ");
+    }
+};
+/**
+ * Logout the user by invalidating the refresh token.
+ *
+ * @param {string} refreshToken - The refresh token of the user
+ * @return {boolean} Indicates if the user was successfully logged out
+ */
+const logout = async (refreshToken) => {
+    try {
+        if (!refreshToken) {
+            return false; 
+        }
+        
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return false;
+        }
+        
+        user.token = undefined;
+        await user.save();
+        return true;
+    } catch (error) {
+        console.error("Error in logout:", error);
+        return false; 
+    }
+};
 
 
 

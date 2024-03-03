@@ -6,6 +6,7 @@ import { authRouter,userRouter } from './route/index.js';
 import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
+import cookieParser from'cookie-parser';
 /** 
  * @des 
  * @author Trịnh Minh Phúc
@@ -25,9 +26,9 @@ connectDB();
 app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
-app.use(checkToken)
-// app.use(checkAuthorization)
+app.use(cookieParser());
 
+// app.use(checkAuthorization)
 
 app.use(morgan('combined'))
 // Cấu hình sever chỉ cho client chạy trên Port:3000
@@ -38,6 +39,7 @@ app.use(
       credentials: true, 
     })
   );
+app.use(checkToken)
 // Router
 app.use("/", authRouter)
 app.use("/user", userRouter)

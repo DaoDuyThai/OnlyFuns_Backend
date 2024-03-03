@@ -46,12 +46,15 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
-    //token
+    token:{
+        type:String,
+        default:undefined
+    },
     verificationCode: {
       type: String,
       default: undefined
     },
-    isActive: {
+    active: {
       type: Boolean,
       default: true
     }
