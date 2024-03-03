@@ -2,11 +2,9 @@ import express from 'express';
 import { userController } from '../controllers/index.js';
 import { checkAuthorization } from '../middleware/Auth.js';
 
-
 const userRouter = express.Router();
 
-userRouter.get('/',checkAuthorization,userController.getAllUser);
-
-
+// TODO: Add checkAuthorization in production
+userRouter.get('/',userController.getAllUser);
 
 export default  userRouter ;

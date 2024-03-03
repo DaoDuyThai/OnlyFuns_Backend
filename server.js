@@ -2,7 +2,7 @@ import express, { json } from 'express';
 import * as dotenv from 'dotenv';
 import connectDB from './connection/DBConnection.js';
 import cors from "cors"
-import { authRouter,userRouter } from './route/index.js';
+import { authRouter,userProfileRouter,userRouter} from './route/index.js';
 import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
@@ -20,7 +20,7 @@ dotenv.config();
 //Create 1 webserver
 const app = express();
 const port = process.env.PORT || 8080;
-connectDB();
+// connectDB();
 // Enable middleware that allows the Express server to work with JSON data
 app.use(json());
 
@@ -41,7 +41,9 @@ app.use(
 // Router
 app.use("/", authRouter)
 app.use("/user", userRouter)
+app.use("/members",userProfileRouter)
 
 app.listen(port, async () => {
-  console.log("Server node Js running on " + port);
+  connectDB();
+  console.log(`Web server running on: http://localhost:${port}`);
 });

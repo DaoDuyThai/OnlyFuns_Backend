@@ -17,4 +17,5 @@ const getAllUser = async(req,res)=>{
         });
     }
 }
+
 export default {getAllUser}
