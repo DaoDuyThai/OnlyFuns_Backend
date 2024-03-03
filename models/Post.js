@@ -1,5 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-import User from "./User.js";
+import mongoose, { Schema } from 'mongoose';
+import User from './User.js';
+
 /**
  * @des
  * @author Bui Anh Hong
@@ -12,52 +13,54 @@ const likeSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User"
-    }
+      ref: 'User',
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 const repostSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User"
+      ref: 'User',
     },
     reason: {
-      type: String
+      type: String,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 const postSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     content: {
       type: String,
       required: true,
     },
-    image: {
-      type: String,
-    },
+    image: [
+      {
+        type: String,
+      },
+    ],
     likes: [likeSchema],
     report: [repostSchema],
     status: {
       type: String,
-      default: "public",
+      default: 'public',
     },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
-const Post = mongoose.model("Post", postSchema);
+const Post = mongoose.model('Post', postSchema);
 export default Post;
