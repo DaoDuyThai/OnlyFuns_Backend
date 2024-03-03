@@ -11,6 +11,7 @@ import {
 import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
+import cookieParser from "cookie-parser";
 /**
  * @des
  * @author Trịnh Minh Phúc
@@ -29,7 +30,7 @@ connectDB();
 app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
-app.use(checkToken);
+// app.use(checkToken);
 // app.use(checkAuthorization)
 
 app.use(morgan('combined'));
