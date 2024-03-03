@@ -30,6 +30,7 @@ connectDB();
 app.use(json());
 
 // Middleware để kiểm soát mọi request đi đến express server
+//TODO:Enable in production
 // app.use(checkToken);
 // app.use(checkAuthorization)
 
