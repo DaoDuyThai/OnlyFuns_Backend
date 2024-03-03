@@ -15,4 +15,5 @@ const getAllUser = async ()=>{
         throw new Error(error.toString());
     }
 }
+
 export default {getAllUser}

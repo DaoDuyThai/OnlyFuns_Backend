@@ -2,9 +2,9 @@ import mongoose, { Schema } from "mongoose";
 import User from "./User.js";
 import Post from "./Post.js";
 /**
- * @des
+ * @des add address
  * @author Bui Anh Hong
- * @date 15/2/2024
+ * @date 2/3/2024
  * @param {*} req
  * @param {*} res
  * @returns
@@ -23,6 +23,19 @@ const connectionSchema = new Schema(
   {
     timestamps: true,
   },
+);
+const addressSchema = new Schema(
+  {
+    city: {
+      type: String
+    },
+    country: {
+      type:String
+    }
+  },
+  {
+    timestamps: true,
+  }
 );
 const userProfileSchema = new Schema(
   {
@@ -58,6 +71,7 @@ const userProfileSchema = new Schema(
         ref: 'Post',
       },
     ],
+    address: addressSchema
   },
   {
     timestamps: true,
