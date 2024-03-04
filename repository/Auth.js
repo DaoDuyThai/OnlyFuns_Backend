@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken';
+import UserProfile from '../models/UserProfile.js';
 
 
 /**
@@ -71,7 +72,7 @@ const sendForgotPasswordEmail = async (email, password) => {
  * @param {} res
  * @returns 
  */
-const registerUser = async (username, email, password) => {
+const registerUser = async (fullName ,username, email, password) => {
     try {
         const existingUser = await User.findOne({ username }).exec();
         if (existingUser) {
@@ -85,6 +86,7 @@ const registerUser = async (username, email, password) => {
         const hashed = await bcrypt.hash(password, salt);
 
         const newUser = new User({
+            fullName,
             username,
             email,
             password: hashed,
@@ -100,6 +102,25 @@ const registerUser = async (username, email, password) => {
         throw new Error(error.toString());
     }
 };
+const createUserProfile = async (userID , fullName ,profilePictureUrl ,backgroundPictureUrl,bio,connections,posts,address)=>{
+    try {
+        const newUserProfile = new UserProfile({
+            userId: userID,
+            fullName: fullName,
+            profilePictureUrl: profilePictureUrl,
+            backgroundPictureUrl: backgroundPictureUrl,
+            bio: bio,
+            connections: connections,
+            posts: posts,
+            address: address
+        });
+        const userProfile = await newUserProfile.save();
+        return userProfile;
+    } catch (error) {
+        throw new Error(error.toString());
+    }
+}
+
 /**
  * Generates an access token for the given user.
  *
@@ -190,11 +211,16 @@ const verifyUser = async (verificationCode) => {
         user.isVerified = true;
         user.verificationCode = undefined;
         await user.save();
+        // Pass all required parameters to createUserProfile function
+        console.log(`user_id: ${user._id}, user_fullName: ${user.fullName}`);
+       
+        await createUserProfile(user._id, user.fullName, user.profilePictureUrl, user.backgroundPictureUrl, user.bio, user.connections, user.posts, user.address);
         return { success: true, message: 'Xac minh thanh cong' };
     } catch (error) {
         throw new Error(error.toString());
     }
 }
+
 /**
  * Verifies the refresh token and returns a new access token.
  *

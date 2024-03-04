@@ -41,6 +41,14 @@ const userSchema = new Schema(
           throw new Error('Password must be greater than or equal six!');
       },
     },
+    fullName: {
+      type: String,
+      required: true,
+      validate(value) {
+        if (value.length < 6)
+          throw new Error('Full name must be greater than or equal six characters!');
+      },
+    },
     role: {
       type: Number,
       default: 1,

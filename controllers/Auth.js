@@ -11,8 +11,8 @@ import { authRepo } from "../repository/index.js";
  */
 const registerUser = async (req, res) => {
     try {
-        const { username, email, password } = req.body;     
-        const result = await authRepo.registerUser(username, email, password);
+        const { fullName,username, email, password } = req.body;     
+        const result = await authRepo.registerUser(fullName,username, email, password);
         if (result.error) {
             return res.status(result.status).json({ message: result.error });
         }
