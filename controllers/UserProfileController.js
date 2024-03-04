@@ -1,12 +1,13 @@
 import {userProfileRepository} from "../repository/index.js";
-// /** 
-//  * @des get members includes 2 collections User&UserProfile
-//  * @author Bui Anh Hong
-//  * @date 2/3/2024
-//  * @param {*} req
-//  * @param {*} res
-//  * @returns
-//  */
+
+/**
+ * @des get members includes 2 collections User&UserProfile
+ * @author Bui Anh Hong
+ * @date 2/3/2024
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 const getMembers = async(req,res)=>{
     try {
         const result = await userProfileRepository.getMembers()

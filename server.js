@@ -13,6 +13,7 @@ import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
 import cookieParser from 'cookie-parser';
+
 /**
  * @des
  * @author Trịnh Minh Phúc
@@ -26,7 +27,12 @@ dotenv.config();
 //Create 1 webserver
 const app = express();
 const port = process.env.PORT || 8080;
-connectDB();
+connectDB()
+  .then(() => {
+    console.log('Connect Database Success');
+  })
+  .catch((e) => console.error(e));
+
 app.use(
   cors({
     origin: process.env.CLIENT,
@@ -38,11 +44,11 @@ app.use(
 app.use(json());
 app.use(cookieParser());
 
-// app.use(checkAuthorization)
+//Todo:Enable in production
+//app.use(checkToken)
 
 app.use(morgan('combined'));
 
-// app.use(checkToken);
 // Router
 app.use('/', authRouter);
 app.use('/user', userRouter);
