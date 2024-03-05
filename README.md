@@ -13,25 +13,25 @@ This repository contains the backend codebase for the OnlyFuns social media plat
 
 ## Setup
 
-1. **Clone the repository:**
+1. Clone the repository:
 ```bash
 git clone https://github.com/DuyThaiddt/OnlyFuns_Backend
 ```
 
-2. **Install dependencies:**
+2. Install dependencies:
 ```bash
 cd OnlyFuns_Backend
 npm install
 ```
 
-3. **Configure environment variables:**
+3. Configure environment variables:
 Create a .env file in the root directory and specify the following environment variables:
 ```bash
 PORT=3000
 MONGODB_URI=<your_mongodb_connection_string>
 JWT_SECRET=<your_jwt_secret_key>
 ```
-4. **Start the server:**
+4. Start the server:
 ```bash
 npm start
 ```

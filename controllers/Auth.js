@@ -11,8 +11,8 @@ import { authRepo } from "../repository/index.js";
  */
 const registerUser = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-        const result = await authRepo.registerUser(username, email, password);
+        const { fullName,username, email, password } = req.body;     
+        const result = await authRepo.registerUser(fullName,username, email, password);
         if (result.error) {
             return res.status(result.status).json({ message: result.error });
         }
@@ -33,10 +33,10 @@ const registerUser = async (req, res) => {
  */
 const loginUser = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const result = await authRepo.loginUser(username, password, res)
-        if (result.error) {
-            return res.status(result.status).json({ message: result.error })
+        const { username,  password } = req.body;  
+        const result = await authRepo.loginUser(username,password,res)
+        if(result.error){
+            return res.status(result.status).json({message:result.error})
         }
         res.status(200).json(result)
     } catch (error) {
@@ -103,9 +103,18 @@ const logout = async (req, res) => {
         res.status(400).json({ message: "Logout failed. Please try again." });
     }
 };
+const forgotPassword = async (req,res)=>{
+    try {
+        const {email} = req.body;
+        const result = await authRepo.forgotPassword(email)
+        if(result.error){
+            return res.status(result.status).json({message:result.error})
+        }
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.toString() });
+    }
+}
 
 
-
-
-
-export default { registerUser, loginUser, verifyUser, verifyRefreshToken, logout };
+export default {registerUser, loginUser,verifyUser,verifyRefreshToken, logout,forgotPassword};

@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken';
+import UserProfile from '../models/UserProfile.js';
 
 
 /**
@@ -14,6 +15,10 @@ import jwt from 'jsonwebtoken';
 const generateVerificationCode = () => {
     return crypto.randomBytes(20).toString('hex');
 };
+const generateNewPassword = () => {
+    return crypto.randomBytes(3).toString('hex');
+};
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -37,6 +42,24 @@ const sendVerificationEmail = async (email, verificationCode) => {
         html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
     };
 
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(info);
+            }
+        });
+    });
+};
+const sendForgotPasswordEmail = async (email, password) => {
+    const mailOptions = {
+        from: "trinhphuc980@gmail.com",
+        to: email,
+        subject: 'Xác Minh Tài Khoản',
+        html: `<p>Mật khẩu của bạn là : ${password}</p>`,
+    };
+
     try {
         const info = await transporter.sendMail(mailOptions);
         console.log('Email sent: ' + info.response);
@@ -54,7 +77,7 @@ const sendVerificationEmail = async (email, verificationCode) => {
  * @param {} res
  * @returns 
  */
-const registerUser = async (username, email, password) => {
+const registerUser = async (fullName ,username, email, password) => {
     try {
         const existingUser = await User.findOne({ username }).exec();
         if (existingUser) {
@@ -68,6 +91,7 @@ const registerUser = async (username, email, password) => {
         const hashed = await bcrypt.hash(password, salt);
 
         const newUser = new User({
+            fullName,
             username,
             email,
             password: hashed,
@@ -83,11 +107,29 @@ const registerUser = async (username, email, password) => {
         throw new Error(error.toString());
     }
 };
+const createUserProfile = async (userID , fullName ,profilePictureUrl ,backgroundPictureUrl,bio,connections,posts,address)=>{
+    try {
+        const newUserProfile = new UserProfile({
+            userId: userID,
+            fullName: fullName,
+            profilePictureUrl: profilePictureUrl,
+            backgroundPictureUrl: backgroundPictureUrl,
+            bio: bio,
+            connections: connections,
+            posts: posts,
+            address: address
+        });
+        const userProfile = await newUserProfile.save();
+        return userProfile;
+    } catch (error) {
+        throw new Error(error.toString());
+    }
+}
+
 /**
  * Generates an access token for the given user.
- * @author Trịnh Minh Phúc
- * @date 29/1/2024
- * @param {Object} user - The user object containing the user's id and role.
+ *
+ * @param {Object} user - The user object containing id and role.
  * @return {string} The generated access token.
  */
 const genAccessToken = (user) => {
@@ -99,11 +141,10 @@ const genAccessToken = (user) => {
     return token;
 };
 /**
- * Generates a reference token for a user.
-* @author Trịnh Minh Phúc
- * @date 29/1/2024
- * @param {Object} user - the user object
- * @return {string} the generated reference token
+ * Generates a reference token for the given user.
+ *
+ * @param {Object} user - The user object
+ * @return {string} The generated reference token
  */
 const genRefToken = (user) => {
     const token = jwt.sign(
@@ -176,7 +217,11 @@ const verifyUser = async (verificationCode) => {
         user.isVerified = true;
         user.verificationCode = undefined;
         await user.save();
-        return { success: true, message: 'Verification Successful!' };
+        // Pass all required parameters to createUserProfile function
+        console.log(`user_id: ${user._id}, user_fullName: ${user.fullName}`);
+       
+        await createUserProfile(user._id, user.fullName, user.profilePictureUrl, user.backgroundPictureUrl, user.bio, user.connections, user.posts, user.address);
+        return { success: true, message: 'Xac minh thanh cong' };
     } catch (error) {
         throw new Error(error.toString());
     }
@@ -224,7 +269,80 @@ const logout = async (refreshToken) => {
     }
 };
 
+/**
+ * Verifies the refresh token and returns a new access token.
+ *
+ * @param {string} refreshToken - The refresh token to verify
+ * @return {Object} An object containing the new access token
+ */
+const verifyRefreshToken = async (refreshToken) => {
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user || user.token !== refreshToken) {
+            return { error: `Ma refToken khong hop le`, status: 404 };
+        }
+        const newAccessToken = genAccessToken(user);
+        return { accessToken: newAccessToken };
+    } catch (error) {
+        throw new Error("Mã refresh token không hợp lệ");
+    }
+};
+/**
+ * Logout the user by invalidating the refresh token.
+ *
+ * @param {string} refreshToken - The refresh token of the user
+ * @return {boolean} Indicates if the user was successfully logged out
+ */
+const logout = async (refreshToken) => {
+    try {
+        if (!refreshToken) {
+            return false;
+        }
+
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return false;
+        }
+
+        user.token = undefined;
+        await user.save();
+        return true;
+    } catch (error) {
+        console.error("Error in logout:", error);
+        return false;
+    }
+};
+const forgotPassword = async (email) => {
+    try {
+        const user = await User.findOne({ email }).exec();
+        if (!user) {
+            return { error: `Không tìm thấy email`, status: 404 };
+        }
+        if (!user.isVerified) {
+            return { error: `Account is not verified.`, status: 400 };
+        }
+        if (!user.active) {
+            return { error: `The account has been banned`, status: 403 };
+        }
+        const newpass =generateNewPassword();
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(newpass, salt);
+        user.password = hashed;
+        await user.save();
+        await sendForgotPasswordEmail(user.email, newpass);
+        return { message: 'Forgot password successful. Please check your email for new password' };
+
+
+    } catch (error) {
+        throw new Error(error.toString());
+    }
+}
 
 
 
-export default { registerUser, genAccessToken, genRefToken, loginUser, verifyUser, verifyRefreshToken , logout}
+
+export default { registerUser, genAccessToken, genRefToken, loginUser, verifyUser, verifyRefreshToken, logout,forgotPassword }

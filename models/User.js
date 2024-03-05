@@ -1,6 +1,7 @@
-import mongoose, { Schema } from "mongoose";
-import crypto from "crypto";
-import isEmail from "validator/lib/isEmail.js";
+import mongoose, { Schema } from 'mongoose';
+import crypto from 'crypto';
+import isEmail from 'validator/lib/isEmail.js';
+
 /**
  * @des
  * @author Trinh Minh Phuc
@@ -10,7 +11,7 @@ import isEmail from "validator/lib/isEmail.js";
  * @returns
  */
 const generateVerificationCode = () => {
-  return crypto.randomBytes(20).toString("hex");
+  return crypto.randomBytes(20).toString('hex');
 };
 const userSchema = new Schema(
   {
@@ -18,9 +19,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      validate(value){
-        if(value.length < 6 || value.length > 30) throw new Error("Username must be form 6 to 30 charaters!");
-      }
+      validate(value) {
+        if (value.length < 6 || value.length > 30)
+          throw new Error('Username must be form 6 to 30 charaters!');
+      },
     },
     email: {
       type: String,
@@ -28,38 +30,51 @@ const userSchema = new Schema(
       unique: true,
       validate: {
         validator: (value) => isEmail,
-        message: "Email is incorrect format!"
-      }
+        message: 'Email is incorrect format!',
+      },
     },
     password: {
       type: String,
       required: true,
-      validate(value){
-        if(value.length < 6) throw new Error("Password must be greater than or equal six!");
-      }
+      validate(value) {
+        if (value.length < 6)
+          throw new Error('Password must be greater than or equal six!');
+      },
+    },
+    fullName: {
+      type: String,
+      required: true,
+      validate(value) {
+        if (value.length < 6)
+          throw new Error('Full name must be greater than or equal six characters!');
+      },
     },
     role: {
       type: Number,
-      default: 1
+      default: 1,
     },
     isVerified: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    token :{
-        type:String,
-        default: undefined
+    token: {
+      type: String,
+      default: undefined,
     },
     verificationCode: {
       type: String,
-      default: undefined
+      default: undefined,
     },
     active: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
+    joinDate: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 export default User;
