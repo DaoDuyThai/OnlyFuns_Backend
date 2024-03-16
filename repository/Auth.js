@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken';
+import UserProfile from '../models/UserProfile.js';
 
 
 /**
@@ -25,11 +26,17 @@ const transporter = nodemailer.createTransport({
         pass: "kfqbavvazdgyysmd",
     },
 });
-
-
+/**
+ * Sends a verification email to the specified email address with the given verification code.
+ * @author Trịnh Minh Phúc
+ * @date 29/1/2024
+ * @param {string} email - The email address to which the verification email will be sent
+ * @param {string} verificationCode - The code used to verify the email address
+ * @return {Promise} A promise that resolves to the information about the sent email
+ */
 const sendVerificationEmail = async (email, verificationCode) => {
     const mailOptions = {
-        from: "trinhphuc980@gmail.com",
+        from: 'trinhphuc980@gmail.com',
         to: email,
         subject: 'Xác Minh Tài Khoản',
         html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
@@ -53,15 +60,14 @@ const sendForgotPasswordEmail = async (email, password) => {
         html: `<p>Mật khẩu của bạn là : ${password}</p>`,
     };
 
-    return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(info);
-            }
-        });
-    });
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
+        return info;
+    } catch (error) {
+        console.error('Error sending email: ', error);
+        throw error;
+    }
 };
 /** 
  * @des Register an account
@@ -71,20 +77,21 @@ const sendForgotPasswordEmail = async (email, password) => {
  * @param {} res
  * @returns 
  */
-const registerUser = async (username, email, password) => {
+const registerUser = async (fullName ,username, email, password) => {
     try {
         const existingUser = await User.findOne({ username }).exec();
         if (existingUser) {
-            return { error: 'Tên người dùng tồn tại', status: 404 };
+            return { error: 'Username exists', status: 404 };
         }
         const existingEmail = await User.findOne({ email }).exec();
         if (existingEmail) {
-            return { error: 'Email người dùng tồn tại', status: 404 };
+            return { error: 'Email exists', status: 404 };
         }
         const salt = await bcrypt.genSalt(10);
         const hashed = await bcrypt.hash(password, salt);
 
         const newUser = new User({
+            fullName,
             username,
             email,
             password: hashed,
@@ -100,6 +107,25 @@ const registerUser = async (username, email, password) => {
         throw new Error(error.toString());
     }
 };
+const createUserProfile = async (userID , fullName ,profilePictureUrl ,backgroundPictureUrl,bio,connections,posts,address)=>{
+    try {
+        const newUserProfile = new UserProfile({
+            userId: userID,
+            fullName: fullName,
+            profilePictureUrl: profilePictureUrl,
+            backgroundPictureUrl: backgroundPictureUrl,
+            bio: bio,
+            connections: connections,
+            posts: posts,
+            address: address
+        });
+        const userProfile = await newUserProfile.save();
+        return userProfile;
+    } catch (error) {
+        throw new Error(error.toString());
+    }
+}
+
 /**
  * Generates an access token for the given user.
  *
@@ -110,7 +136,7 @@ const genAccessToken = (user) => {
     const token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_ACCESS_KEY,
-        { expiresIn: "60s" }
+        { expiresIn: "2d" }
     );
     return token;
 };
@@ -173,6 +199,7 @@ const loginUser = async (username, password, res) => {
     }
 };
 
+
 /** 
  * @des Account authentication
  * @author Trịnh Minh Phúc
@@ -190,11 +217,58 @@ const verifyUser = async (verificationCode) => {
         user.isVerified = true;
         user.verificationCode = undefined;
         await user.save();
+        // Pass all required parameters to createUserProfile function
+        console.log(`user_id: ${user._id}, user_fullName: ${user.fullName}`);
+       
+        await createUserProfile(user._id, user.fullName, user.profilePictureUrl, user.backgroundPictureUrl, user.bio, user.connections, user.posts, user.address);
         return { success: true, message: 'Xac minh thanh cong' };
     } catch (error) {
         throw new Error(error.toString());
     }
 }
+/**
+ * Verify the refresh token and generate a new access token.
+ *
+ * @param {string} refreshToken - The refresh token to be verified.
+ * @return {string|object} The new access token if the refresh token is valid, or an error object.
+ */
+const verifyRefreshToken = async (refreshToken) => {
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user || user.token !== refreshToken) {
+            return { error: `Ma refToken khong hop le`, status: 404 };
+        }
+        const newAccessToken = genAccessToken(user);
+        return {accessToken:newAccessToken};
+    } catch (error) {
+        throw new Error("Mã refresh token không hợp lệ");
+    }
+};
+
+const logout = async (refreshToken) => {
+    try {
+        if (!refreshToken) {
+            return false; 
+        }
+        
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+        const userId = decoded.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return false;
+        }
+        
+        user.token = undefined;
+        await user.save();
+        return true;
+    } catch (error) {
+        console.error("Error in logout:", error);
+        return false; 
+    }
+};
+
 /**
  * Verifies the refresh token and returns a new access token.
  *

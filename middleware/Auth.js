@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 const listByPassURL = [
     '/login',
     '/register',
-    '/forgot'
+    '/forgot'    
 ]
 const listByPassPART = [
     '/verify'
@@ -35,14 +35,12 @@ const checkToken = (req, res, next) => {
     }
     try {
         const token = req.headers?.authorization?.split(' ')[1];
-
         if (!token) {
             res.status(401).json({
                 message: 'Unauthorized'
             });
             return;
         }
-
         jwt.verify(token, process.env.JWT_ACCESS_KEY, (err, jwtObject) => {
             if (err) {
                 if (err.name === 'TokenExpiredError') {
