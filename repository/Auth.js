@@ -232,42 +232,43 @@ const verifyUser = async (verificationCode) => {
  * @param {string} refreshToken - The refresh token to be verified.
  * @return {string|object} The new access token if the refresh token is valid, or an error object.
  */
-const verifyRefreshToken = async (refreshToken) => {
-    try {
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
-        const userId = decoded.id;
-        const user = await User.findById(userId);
-        if (!user || user.token !== refreshToken) {
-            return { error: `Ma refToken khong hop le`, status: 404 };
-        }
-        const newAccessToken = genAccessToken(user);
-        return {accessToken:newAccessToken};
-    } catch (error) {
-        throw new Error("Mã refresh token không hợp lệ");
-    }
-};
+// const verifyRefreshToken = async (refreshToken) => {
+//     try {
+//         const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+//         const userId = decoded.id;
+//         const user = await User.findById(userId);
+//         if (!user || user.token !== refreshToken) {
+//             return { error: `Ma refToken khong hop le`, status: 404 };
+//         }
+//         const newAccessToken = genAccessToken(user);
+//         return {accessToken:newAccessToken};
+//     } catch (error) {
+//         throw new Error("Mã refresh token không hợp lệ");
+//     }
+// };
 
-const logout = async (refreshToken) => {
-    try {
-        if (!refreshToken) {
-            return false; 
-        }
-        
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
-        const userId = decoded.id;
-        const user = await User.findById(userId);
-        if (!user) {
-            return false;
-        }
-        
-        user.token = undefined;
-        await user.save();
-        return true;
-    } catch (error) {
-        console.error("Error in logout:", error);
-        return false; 
-    }
-};
+
+// const logout = async (refreshToken) => {
+//     try {
+//         if (!refreshToken) {
+//             return false;
+//         }
+//
+//         const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+//         const userId = decoded.id;
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             return false;
+//         }
+//
+//         user.token = undefined;
+//         await user.save();
+//         return true;
+//     } catch (error) {
+//         console.error("Error in logout:", error);
+//         return false;
+//     }
+// };
 
 /**
  * Verifies the refresh token and returns a new access token.
