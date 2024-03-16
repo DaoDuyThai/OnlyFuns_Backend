@@ -247,6 +247,7 @@ const verifyUser = async (verificationCode) => {
 //     }
 // };
 
+
 // const logout = async (refreshToken) => {
 //     try {
 //         if (!refreshToken) {
