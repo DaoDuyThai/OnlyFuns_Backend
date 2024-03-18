@@ -191,7 +191,7 @@ const loginUser = async (username, password, res) => {
             });
             user.token = refToken;
             await user.save();
-            const { password, role, _id, token, ...info } = user.toObject();
+            const { password, role, token, ...info } = user.toObject();
             return { message: "Login successful", info, accessToken };
         }
     } catch (error) {
