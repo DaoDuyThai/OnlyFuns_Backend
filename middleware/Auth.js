@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken'
 const listByPassURL = [
     '/login',
     '/register',
-    '/forgot'    
+    '/forgot' ,
+    '/refresh', 
+    '/logout',
 ]
 const listByPassPART = [
     '/verify'
