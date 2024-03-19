@@ -13,6 +13,9 @@ import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
 import cookieParser from 'cookie-parser';
+import server from './middleware/Chat.js';
+import chatRouter from './route/ChatRouter.js';
+import bodyParser from 'body-parser';
 
 /**
  * @des
@@ -27,6 +30,7 @@ dotenv.config();
 //Create 1 webserver
 const app = express();
 const port = process.env.PORT || 8080;
+const serverPort = 9090;
 connectDB()
   .then(() => {
     console.log('Connect Database Success');
@@ -40,8 +44,13 @@ app.use(
     credentials: true,
   }),
 );
+
 // Enable middleware that allows the Express server to work with JSON data
-app.use(json());
+// Parse JSON bodies
+app.use(bodyParser.json());
+
+// Parse URL-encoded bodies
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 //Todo:Enable in production
@@ -54,7 +63,12 @@ app.use('/', authRouter);
 app.use('/user', userRouter);
 app.use('/dash-board', dashBoardRouter);
 app.use('/post', postRouter);
-app.use('/members', userProfileRouter);
+app.use('/profile', userProfileRouter);
+app.use('/chat', chatRouter);
+
 app.listen(port, async () => {
   console.log('Server node Js running on ' + port);
+});
+server.listen(serverPort, () => {
+  console.log('Server socket.io running on ' + serverPort);
 });

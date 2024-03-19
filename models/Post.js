@@ -20,7 +20,7 @@ const likeSchema = new Schema(
     timestamps: true,
   },
 );
-const repostSchema = new Schema(
+const reportSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -51,7 +51,7 @@ const postSchema = new Schema(
       },
     ],
     likes: [likeSchema],
-    report: [repostSchema],
+    report: [reportSchema],
     status: {
       type: String,
       default: 'public',

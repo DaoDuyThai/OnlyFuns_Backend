@@ -1,10 +1,9 @@
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
-import nodemailer from 'nodemailer'
-import crypto from 'crypto'
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import UserProfile from '../models/UserProfile.js';
-
 
 /**
  * Generates a verification code using crypto.randomBytes.
@@ -13,18 +12,18 @@ import UserProfile from '../models/UserProfile.js';
  * @return {string} The generated verification code in hexadecimal format.
  */
 const generateVerificationCode = () => {
-    return crypto.randomBytes(20).toString('hex');
+  return crypto.randomBytes(20).toString('hex');
 };
 const generateNewPassword = () => {
-    return crypto.randomBytes(3).toString('hex');
+  return crypto.randomBytes(3).toString('hex');
 };
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: "trinhphuc980@gmail.com",
-        pass: "kfqbavvazdgyysmd",
-    },
+  service: 'gmail',
+  auth: {
+    user: 'trinhphuc980@gmail.com',
+    pass: 'kfqbavvazdgyysmd',
+  },
 });
 /**
  * Sends a verification email to the specified email address with the given verification code.
@@ -35,96 +34,108 @@ const transporter = nodemailer.createTransport({
  * @return {Promise} A promise that resolves to the information about the sent email
  */
 const sendVerificationEmail = async (email, verificationCode) => {
-    const mailOptions = {
-        from: 'trinhphuc980@gmail.com',
-        to: email,
-        subject: 'Xác Minh Tài Khoản',
-        html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
-    };
+  const mailOptions = {
+    from: 'trinhphuc980@gmail.com',
+    to: email,
+    subject: 'Xác Minh Tài Khoản',
+    html: `<p>Nhấp vào liên kết sau để xác minh tài khoản: <a href="http://localhost:3000/verify/${verificationCode}">Xác Minh</a></p>`,
+  };
 
-    return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(info);
-            }
-        });
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(info);
+      }
     });
+  });
 };
 const sendForgotPasswordEmail = async (email, password) => {
-    const mailOptions = {
-        from: "trinhphuc980@gmail.com",
-        to: email,
-        subject: 'Xác Minh Tài Khoản',
-        html: `<p>Mật khẩu của bạn là : ${password}</p>`,
-    };
+  const mailOptions = {
+    from: 'trinhphuc980@gmail.com',
+    to: email,
+    subject: 'Xác Minh Tài Khoản',
+    html: `<p>Mật khẩu của bạn là : ${password}</p>`,
+  };
 
-    try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
-        return info;
-    } catch (error) {
-        console.error('Error sending email: ', error);
-        throw error;
-    }
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent: ' + info.response);
+    return info;
+  } catch (error) {
+    console.error('Error sending email: ', error);
+    throw error;
+  }
 };
-/** 
+/**
  * @des Register an account
  * @author Trịnh Minh Phúc
  * @date 29/1/2024
  * @param {username, email, password} req
  * @param {} res
- * @returns 
+ * @returns
  */
-const registerUser = async (fullName ,username, email, password) => {
-    try {
-        const existingUser = await User.findOne({ username }).exec();
-        if (existingUser) {
-            return { error: 'Username exists', status: 404 };
-        }
-        const existingEmail = await User.findOne({ email }).exec();
-        if (existingEmail) {
-            return { error: 'Email exists', status: 404 };
-        }
-        const salt = await bcrypt.genSalt(10);
-        const hashed = await bcrypt.hash(password, salt);
-
-        const newUser = new User({
-            fullName,
-            username,
-            email,
-            password: hashed,
-            verificationCode: generateVerificationCode()
-        });
-
-        const user = await newUser.save();
-        await sendVerificationEmail(user.email, user.verificationCode);
-
-        const { password: userPassword, ...others } = user.toObject();
-        return { user: others, message: 'Register successful. Please check your email for verification.' };
-    } catch (error) {
-        throw new Error(error.toString());
+const registerUser = async (fullName, username, email, password) => {
+  try {
+    const existingUser = await User.findOne({ username }).exec();
+    if (existingUser) {
+      return { error: 'Username exists', status: 404 };
     }
+    const existingEmail = await User.findOne({ email }).exec();
+    if (existingEmail) {
+      return { error: 'Email exists', status: 404 };
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      fullName,
+      username,
+      email,
+      password: hashed,
+      verificationCode: generateVerificationCode(),
+    });
+
+    const user = await newUser.save();
+    await sendVerificationEmail(user.email, user.verificationCode);
+
+    const { password: userPassword, ...others } = user.toObject();
+    return {
+      user: others,
+      message: 'Register successful. Please check your email for verification.',
+    };
+  } catch (error) {
+    throw new Error(error.toString());
+  }
 };
-const createUserProfile = async (userID , fullName ,profilePictureUrl ,backgroundPictureUrl,bio,connections,posts,address)=>{
-    try {
-        const newUserProfile = new UserProfile({
-            userId: userID,
-            fullName: fullName,
-            profilePictureUrl: profilePictureUrl,
-            backgroundPictureUrl: backgroundPictureUrl,
-            bio: bio,
-            connections: connections,
-            posts: posts,
-            address: address
-        });
-        const userProfile = await newUserProfile.save();
-        return userProfile;
-    } catch (error) {
-        throw new Error(error.toString());
-    }
-}
+const createUserProfile = async (
+  userID,
+  fullName,
+  profilePictureUrl,
+  backgroundPictureUrl,
+  bio,
+  connections,
+  posts,
+  address,
+) => {
+  try {
+    const newUserProfile = new UserProfile({
+      userId: userID,
+      fullName: fullName,
+      profilePictureUrl: profilePictureUrl,
+      backgroundPictureUrl: backgroundPictureUrl,
+      bio: bio,
+      connections: connections,
+      posts: posts,
+      address: address,
+    });
+    const userProfile = await newUserProfile.save();
+    return userProfile;
+  } catch (error) {
+    throw new Error(error.toString());
+  }
+};
 
 /**
  * Generates an access token for the given user.
@@ -133,12 +144,12 @@ const createUserProfile = async (userID , fullName ,profilePictureUrl ,backgroun
  * @return {string} The generated access token.
  */
 const genAccessToken = (user) => {
-    const token = jwt.sign(
-        { id: user.id, role: user.role },
-        process.env.JWT_ACCESS_KEY,
-        { expiresIn: "2d" }
-    );
-    return token;
+  const token = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_ACCESS_KEY,
+    { expiresIn: '2d' },
+  );
+  return token;
 };
 /**
  * Generates a reference token for the given user.
@@ -147,85 +158,96 @@ const genAccessToken = (user) => {
  * @return {string} The generated reference token
  */
 const genRefToken = (user) => {
-    const token = jwt.sign(
-        { id: user.id, role: user.role },
-        process.env.JWT_REF_KEY,
-        { expiresIn: "20d" }
-    );
-    return token;
+  const token = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_REF_KEY,
+    { expiresIn: '20d' },
+  );
+  return token;
 };
 
-/** 
+/**
  * @des Log in to your account
  * @author Trịnh Minh Phúc
  * @date 29/1/2024
  * @param {username,  password} req
  * @param {*} res
- * @returns 
+ * @returns
  */
 const loginUser = async (username, password, res) => {
-    try {
-        const user = await User.findOne({ username }).exec();
-        if (!user) {
-            return { error: `User with username '${username}' not found`, status: 404 };
-        }
-
-        if (!user.isVerified) {
-            return { error: `Account is not verified.`, status: 400 };
-        }
-        if (!user.active) {
-            return { error: `The account has been banned`, status: 403 };
-        }
-
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return { error: `Wrong Password`, status: 401 };
-        } else {
-            const accessToken = genAccessToken(user);
-            const refToken = genRefToken(user);
-            res.cookie("refToken", refToken, {
-                httpOnly: true,
-                secure: false,
-                path: "/",
-                sameSite: "strict",
-            });
-            user.token = refToken;
-            await user.save();
-            const { password, role, _id, token, ...info } = user.toObject();
-            return { message: "Login successful", info, accessToken };
-        }
-    } catch (error) {
-        throw new Error(error.toString());
+  try {
+    const user = await User.findOne({ username }).exec();
+    if (!user) {
+      return {
+        error: `User with username '${username}' not found`,
+        status: 404,
+      };
     }
+
+    if (!user.isVerified) {
+      return { error: `Account is not verified.`, status: 400 };
+    }
+    if (!user.active) {
+      return { error: `The account has been banned`, status: 403 };
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return { error: `Wrong Password`, status: 401 };
+    } else {
+      const accessToken = genAccessToken(user);
+      const refToken = genRefToken(user);
+      res.cookie('refToken', refToken, {
+        httpOnly: true,
+        secure: false,
+        path: '/',
+        sameSite: 'strict',
+      });
+      user.token = refToken;
+      await user.save();
+      const { password, role, token, ...info } = user.toObject();
+      return { message: 'Login successful', info, accessToken };
+    }
+  } catch (error) {
+    throw new Error(error.toString());
+  }
 };
 
-
-/** 
+/**
  * @des Account authentication
  * @author Trịnh Minh Phúc
  * @date 30/1/2024
  * @param {verificationCode} req
  * @param {*} res
- * @returns 
+ * @returns
  */
 const verifyUser = async (verificationCode) => {
-    try {
-        const user = await User.findOne({ verificationCode }).exec();
-        if (!user) {
-            return { error: `Ma xac minh khong hop le`, status: 404 };
-        }
-        user.isVerified = true;
-        user.verificationCode = undefined;
-        await user.save();
-        // Pass all required parameters to createUserProfile function
-        console.log(`user_id: ${user._id}, user_fullName: ${user.fullName}`);
-       
-        await createUserProfile(user._id, user.fullName, user.profilePictureUrl, user.backgroundPictureUrl, user.bio, user.connections, user.posts, user.address);
-        return { success: true, message: 'Xac minh thanh cong' };
-    } catch (error) {
-        throw new Error(error.toString());
+  try {
+    const user = await User.findOne({ verificationCode }).exec();
+    if (!user) {
+      return { error: `Ma xac minh khong hop le`, status: 404 };
     }
-}
+    user.isVerified = true;
+    user.verificationCode = undefined;
+    await user.save();
+    // Pass all required parameters to createUserProfile function
+    console.log(`user_id: ${user._id}, user_fullName: ${user.fullName}`);
+
+    await createUserProfile(
+      user._id,
+      user.fullName,
+      user.profilePictureUrl,
+      user.backgroundPictureUrl,
+      user.bio,
+      user.connections,
+      user.posts,
+      user.address,
+    );
+    return { success: true, message: 'Xac minh thanh cong' };
+  } catch (error) {
+    throw new Error(error.toString());
+  }
+};
 /**
  * Verify the refresh token and generate a new access token.
  *
@@ -246,7 +268,6 @@ const verifyUser = async (verificationCode) => {
 //         throw new Error("Mã refresh token không hợp lệ");
 //     }
 // };
-
 
 // const logout = async (refreshToken) => {
 //     try {
@@ -277,18 +298,18 @@ const verifyUser = async (verificationCode) => {
  * @return {Object} An object containing the new access token
  */
 const verifyRefreshToken = async (refreshToken) => {
-    try {
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
-        const userId = decoded.id;
-        const user = await User.findById(userId);
-        if (!user || user.token !== refreshToken) {
-            return { error: `Ma refToken khong hop le`, status: 404 };
-        }
-        const newAccessToken = genAccessToken(user);
-        return { accessToken: newAccessToken };
-    } catch (error) {
-        throw new Error("Mã refresh token không hợp lệ");
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+    const userId = decoded.id;
+    const user = await User.findById(userId);
+    if (!user || user.token !== refreshToken) {
+      return { error: `Ma refToken khong hop le`, status: 404 };
     }
+    const newAccessToken = genAccessToken(user);
+    return { accessToken: newAccessToken };
+  } catch (error) {
+    throw new Error('Mã refresh token không hợp lệ');
+  }
 };
 /**
  * Logout the user by invalidating the refresh token.
@@ -297,53 +318,60 @@ const verifyRefreshToken = async (refreshToken) => {
  * @return {boolean} Indicates if the user was successfully logged out
  */
 const logout = async (refreshToken) => {
-    try {
-        if (!refreshToken) {
-            return false;
-        }
-
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
-        const userId = decoded.id;
-        const user = await User.findById(userId);
-        if (!user) {
-            return false;
-        }
-
-        user.token = undefined;
-        await user.save();
-        return true;
-    } catch (error) {
-        console.error("Error in logout:", error);
-        return false;
+  try {
+    if (!refreshToken) {
+      return false;
     }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REF_KEY);
+    const userId = decoded.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return false;
+    }
+
+    user.token = undefined;
+    await user.save();
+    return true;
+  } catch (error) {
+    console.error('Error in logout:', error);
+    return false;
+  }
 };
 const forgotPassword = async (email) => {
-    try {
-        const user = await User.findOne({ email }).exec();
-        if (!user) {
-            return { error: `Không tìm thấy email`, status: 404 };
-        }
-        if (!user.isVerified) {
-            return { error: `Account is not verified.`, status: 400 };
-        }
-        if (!user.active) {
-            return { error: `The account has been banned`, status: 403 };
-        }
-        const newpass =generateNewPassword();
-        const salt = await bcrypt.genSalt(10);
-        const hashed = await bcrypt.hash(newpass, salt);
-        user.password = hashed;
-        await user.save();
-        await sendForgotPasswordEmail(user.email, newpass);
-        return { message: 'Forgot password successful. Please check your email for new password' };
-
-
-    } catch (error) {
-        throw new Error(error.toString());
+  try {
+    const user = await User.findOne({ email }).exec();
+    if (!user) {
+      return { error: `Không tìm thấy email`, status: 404 };
     }
-}
+    if (!user.isVerified) {
+      return { error: `Account is not verified.`, status: 400 };
+    }
+    if (!user.active) {
+      return { error: `The account has been banned`, status: 403 };
+    }
+    const newpass = generateNewPassword();
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newpass, salt);
+    user.password = hashed;
+    await user.save();
+    await sendForgotPasswordEmail(user.email, newpass);
+    return {
+      message:
+        'Forgot password successful. Please check your email for new password',
+    };
+  } catch (error) {
+    throw new Error(error.toString());
+  }
+};
 
-
-
-
-export default { registerUser, genAccessToken, genRefToken, loginUser, verifyUser, verifyRefreshToken, logout,forgotPassword }
+export default {
+  registerUser,
+  genAccessToken,
+  genRefToken,
+  loginUser,
+  verifyUser,
+  verifyRefreshToken,
+  logout,
+  forgotPassword,
+};

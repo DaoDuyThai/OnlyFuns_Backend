@@ -26,15 +26,7 @@ const notificationSchema = new Schema(
       type: String,
       required: true
     },
-    messageListId: {
-      type: Schema.Types.ObjectId,
-      ref: "MessageList"
-    },
-    messageId: {
-      type: Schema.Types.ObjectId,
-      ref: "Message"
-    },
-    postId: {
+    post: {
       type: Schema.Types.ObjectId,
       ref: "Post"
     }

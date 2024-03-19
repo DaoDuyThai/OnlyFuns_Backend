@@ -1,4 +1,4 @@
-import {userProfileRepository} from "../repository/index.js";
+import { userProfileRepository } from '../repository/index.js';
 
 /**
  * @des get members includes 2 collections User&UserProfile
@@ -8,14 +8,56 @@ import {userProfileRepository} from "../repository/index.js";
  * @param {*} res
  * @returns
  */
-const getMembers = async(req,res)=>{
-    try {
-        const result = await userProfileRepository.getMembers()
-        res.status(200).json(result)
-    } catch (error) {
-        res.status(500).json({
-            message: error.toString()
-        });
-    }
-}
-export default {getMembers}
+const getMembers = async (req, res) => {
+  try {
+    const result = await userProfileRepository.getMembers();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString(),
+    });
+  }
+};
+/**
+ * @des get user profile by user id
+ * @author Nguyen LD
+ * @date 15/3/2024
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+
+const getProfileByUserId = async (req, res) => {
+  try {
+    const result = await userProfileRepository.getProfileByUserId(
+      req.params.userId,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString(),
+    });
+  }
+};
+/**
+ * @des update profile by user id
+ * @author Nguyen LD
+ * @date 15/3/2024
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+const updateProfile = async (req, res) => {
+  try {
+    const result = await userProfileRepository.updateProfile(
+      req.params.userId,
+      req.body,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString(),
+    });
+  }
+};
+export default { getMembers, getProfileByUserId, updateProfile };

@@ -5,6 +5,6 @@ import { checkAuthorization } from '../middleware/Auth.js';
 const userProfileRouter = express.Router();
 
 // TODO: Add checkAuthorization in production
-userProfileRouter.get('/',userProfileController.getMembers);
-
+userProfileRouter.get('/members',userProfileController.getMembers);
+userProfileRouter.get('/:userId',userProfileController.getProfileByUserId);
 export default  userProfileRouter ;
