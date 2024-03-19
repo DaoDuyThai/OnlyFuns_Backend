@@ -70,7 +70,7 @@ async function getUser(req, res) {
     // Extract the user's ID from the request parameters
     const id = req.params.id;
     // Find the user by their ID, selecting only the username field
-    const response = await User.findById(id, 'username', null);
+    const response = await User.findById(id, 'username fullName', null);
     // Send a response with a success message and the data of the user
     res.status(200).json({
       status: 'success',

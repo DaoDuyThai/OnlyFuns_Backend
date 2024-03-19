@@ -1,4 +1,5 @@
 import Post from '../models/Post.js';
+import Comment from '../models/Comment.js';
 
 /**
  * @function createPost
@@ -34,7 +35,30 @@ async function createPost(req, res) {
     // If there is an error, send a response with an error message
     res.status(500).json({
       status: 'fail',
-      message: e,
+      message: e.toString(),
+    });
+  }
+}
+
+async function getPostByID(req, res) {
+  const postId = req.params.id;
+  try {
+    const postResponse = await Post.findById({ _id: postId });
+    const commentResponse = await Comment.find({ postId: postId });
+    const response = {
+      ...postResponse._doc,
+      comments: commentResponse,
+    };
+    if (response) {
+      res.status(200).json({
+        status: 'success',
+        data: response,
+      });
+    }
+  } catch (e) {
+    res.status(500).json({
+      status: 'fail',
+      message: e.toString(),
     });
   }
 }
@@ -66,7 +90,7 @@ async function getPosts(req, res) {
     // If there is an error, send a response with an error message
     res.status(500).json({
       status: 'fail',
-      message: e,
+      message: e.toString(),
     });
   }
 }
@@ -99,9 +123,27 @@ async function getPostReports(req, res) {
     // If there is an error, send a response with an error message
     res.status(500).json({
       status: 'fail',
-      message: e,
+      message: e.toString(),
     });
   }
 }
 
-export { createPost, getPosts, getPostReports };
+async function addPostComment(req, res) {
+  const { postId, userId, content } = req.body;
+  try {
+    const response = await Comment.create({ postId, userId, content });
+    if (response) {
+      res.status(201).json({
+        status: 'success',
+        data: response,
+      });
+    }
+  } catch (e) {
+    res.status(500).json({
+      status: 'fail',
+      message: e.toString(),
+    });
+  }
+}
+
+export { createPost, getPosts, getPostReports, getPostByID, addPostComment };

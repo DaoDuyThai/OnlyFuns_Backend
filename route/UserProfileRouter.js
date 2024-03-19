@@ -6,5 +6,5 @@ const userProfileRouter = express.Router();
 
 // TODO: Add checkAuthorization in production
 userProfileRouter.get('/',userProfileController.getMembers);
-
+userProfileRouter.route('/:id').get(userProfileController.getUserProfile);
 export default  userProfileRouter ;
