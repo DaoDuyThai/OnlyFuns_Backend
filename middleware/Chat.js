@@ -34,6 +34,8 @@ io.on('connection', (socket) => {
     socket.on('receiveMessage', (data) => {
         console.log('Receive message:', data);
     });
+  //leave room
+  
 });
 
 export default server;

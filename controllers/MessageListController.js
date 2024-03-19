@@ -32,8 +32,8 @@ const createMessageList = async (req, res) => {
 };
 const getAllMessageLists = async (req, res) => {
   try {
-    const messageList = await Chat.getAllMessageLists();
-    res.status(200).json(messageList);
+    const messageLists = await Chat.getAllMessageLists();
+    res.status(200).json(messageLists);
   } catch (error) {
     console.error('Error getting message lists:', error);
     res.status(500).json({ error: 'Failed to get message lists' });

@@ -10,15 +10,21 @@ import User from './User.js';
  */
 const lastMessageSchema = new Schema(
   {
-    content: {
+    sender: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    message: {
       type: String,
+      required: true,
     },
   },
   {
     timestamps: true,
   },
 );
-
+ 
 const messageListSchema = new Schema(
   {
     participants: [

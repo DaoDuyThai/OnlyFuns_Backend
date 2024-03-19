@@ -1,5 +1,6 @@
 import MessageList from '../models/MessageList.js';
-
+import UserProfile from '../models/UserProfile.js';
+import User from '../models/User.js';
 const createMessageList = async (participants) => {
   try {
     // Check if a message list already exists with the provided participants
@@ -17,44 +18,57 @@ const createMessageList = async (participants) => {
     throw new Error(error.toString());
   }
 };
+
+// const getAllMessageLists = async () => {
+//   try {
+//     // Find all message lists and populate participants
+//     const messageLists = await MessageList.find({}).populate({
+//       path: 'participants',
+//       model: 'User', // Assuming User is the model for participants
+//     });
+
+//     // Extract user IDs from all participants in all message lists
+//     const userIds = messageLists.reduce((acc, messageList) => {
+//       messageList.participants.forEach((participant) => {
+//         acc.add(participant._id);
+//       });
+//       return acc;
+//     }, new Set());
+
+//     // Fetch user profiles including profile pictures
+//     const userProfiles = await UserProfile.find({
+//       user: { $in: Array.from(userIds) },
+//     });
+
+//     // Map user profiles to participants in all message lists
+//     messageLists.forEach((messageList) => {
+//       messageList.participants.forEach((participant) => {
+//         const userProfile = userProfiles.find((profile) =>
+//           profile.user.equals(participant._id),
+//         );
+//         if (userProfile) {
+//           participant.profilePicture = userProfile.profilePictureUrl;
+//         }
+//       });
+//     });
+
+//     // Return the populated message lists
+//     return messageLists;
+//   } catch (error) {
+//     // Handle errors
+//     throw new Error('Failed to fetch message lists: ' + error.message);
+//   }
+// };
 const getAllMessageLists = async () => {
   try {
-    const messageLists = await MessageList.find()
-      .populate({
-        path: 'participants',
-        model: 'User',
-        select: '_id username profile', // Include the profile reference field
-      })
-      .populate({
-        path: 'lastMessage',
-        model: 'Message',
-        select: '_id content',
-      });
-
-    // Extract avatar URLs from user profiles and add them to participants
-    const populatedMessageLists = messageLists.map((messageList) => {
-      const participantsWithAvatar = messageList.participants.map(
-        (participant) => {
-          // Access the profile reference and retrieve the avatar URL
-          const profilePictureUrl = participant.profile.profilePictureUrl;
-          return {
-            _id: participant._id,
-            username: participant.username,
-            avatar: profilePictureUrl, // Include the avatar URL in the participant object
-          };
-        },
-      );
-
-      // Replace the participants array with the updated array containing avatars
-      return {
-        ...messageList.toObject(),
-        participants: participantsWithAvatar,
-      };
+    const messageLists = await MessageList.find({}).populate({
+      path: 'participants',
+      model: 'User',
+      select: 'username',
     });
-
-    return populatedMessageLists;
+    return messageLists;
   } catch (error) {
-    throw new Error(error.toString());
+    throw new Error('Failed to fetch message lists: ' + error.message);
   }
 };
 
