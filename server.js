@@ -13,6 +13,9 @@ import morgan from 'morgan';
 import { checkAuthorization } from './middleware/Auth.js';
 import { checkToken } from './middleware/Auth.js';
 import cookieParser from 'cookie-parser';
+import UserProfile from './models/UserProfile.js';
+import { Server } from 'socket.io';
+import http from 'http';
 
 /**
  * @des
@@ -27,12 +30,9 @@ dotenv.config();
 //Create 1 webserver
 const app = express();
 const port = process.env.PORT || 8080;
-connectDB()
-  .then(() => {
-    console.log('Connect Database Success');
-  })
-  .catch((e) => console.error(e));
+const server = http.createServer(app); 
 
+const io = new Server(server);
 app.use(
   cors({
     origin: process.env.CLIENT,
@@ -40,14 +40,24 @@ app.use(
     credentials: true,
   }),
 );
+
+
+
+connectDB()
+  .then(() => {
+    console.log('Connect Database Success');
+  })
+  .catch((e) => console.error(e));
+
+
 // Enable middleware that allows the Express server to work with JSON data
 app.use(json());
 app.use(cookieParser());
 
 //Todo:Enable in production
-//app.use(checkToken)
+// app.use(checkToken)
 
-app.use(morgan('combined'));
+app.use(morgan('dev'));
 
 // Router
 app.use('/', authRouter);
@@ -58,3 +68,6 @@ app.use('/members', userProfileRouter);
 app.listen(port, async () => {
   console.log('Server node Js running on ' + port);
 });
+
+
+

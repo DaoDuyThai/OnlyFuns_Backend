@@ -136,7 +136,7 @@ const genAccessToken = (user) => {
     const token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_ACCESS_KEY,
-        { expiresIn: "2d" }
+        { expiresIn: "30s" }
     );
     return token;
 };
@@ -191,7 +191,7 @@ const loginUser = async (username, password, res) => {
             });
             user.token = refToken;
             await user.save();
-            const { password, role, _id, token, ...info } = user.toObject();
+            const { password, role, token, ...info } = user.toObject();
             return { message: "Login successful", info, accessToken };
         }
     } catch (error) {
@@ -301,6 +301,7 @@ const forgotPassword = async (email) => {
         throw new Error(error.toString());
     }
 }
+
 
 
 

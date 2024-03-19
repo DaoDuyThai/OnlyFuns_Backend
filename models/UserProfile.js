@@ -11,13 +11,17 @@ import Post from "./Post.js";
  */
 const connectionSchema = new Schema(
   {
-    userId: {
+    userIdSender: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
     status: {
       type: String,
       default: 'pending',
+    },
+    userIdReceiver: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
   },
   {
