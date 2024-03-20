@@ -50,7 +50,7 @@ app.use(
 // Enable middleware that allows the Express server to work with JSON data
 app.use(json());
 app.use(cookieParser());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 //Todo:Enable in production
 //app.use(checkToken)
 
