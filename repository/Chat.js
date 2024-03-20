@@ -1,6 +1,7 @@
 import MessageList from '../models/MessageList.js';
 import UserProfile from '../models/UserProfile.js';
 import User from '../models/User.js';
+import Message from '../models/Message.js';
 const createMessageList = async (participants) => {
   try {
     // Check if a message list already exists with the provided participants
@@ -19,7 +20,6 @@ const createMessageList = async (participants) => {
   }
 };
 
-// const getAllMessageLists = async () => {
 //   try {
 //     // Find all message lists and populate participants
 //     const messageLists = await MessageList.find({}).populate({
@@ -72,7 +72,32 @@ const getAllMessageLists = async () => {
   }
 };
 
+const getMessages = async (messageListId) => {
+  try {
+    const messages = await Message.find({ messageList: messageListId })
+      .sort({ timestamp: 1 }); // Sort messages by timestamp in ascending order
+    return messages;
+  } catch (error) {
+    throw new Error('Failed to fetch messages: ' + error.message);
+  }
+};
+
+const addMessage = async (messageListId, content, sender) => {
+  try {
+    const newMessage = await Message.create({
+      messageListId,
+      content,
+      sender,
+    });
+    return newMessage;
+  } catch (error) {
+    throw new Error('Failed to add message: ' + error.message);
+  }
+};
+
 export default {
   createMessageList,
   getAllMessageLists,
+  getMessages,
+  addMessage,
 };
