@@ -1,12 +1,13 @@
 import express from 'express';
 import { userProfileController } from '../controllers/index.js';
 import { checkAuthorization } from '../middleware/Auth.js';
+import UserProfile from "../models/UserProfile.js";
 
 const userProfileRouter = express.Router();
 
 // TODO: Add checkAuthorization in production
 userProfileRouter.get('/',userProfileController.getMembers);
-userProfileRouter.route('/:id').get(userProfileController.getUserProfile);
+// userProfileRouter.route('/:id').get(userProfileController.getUserProfile);
 
 userProfileRouter.get('/:id', async (req, res) => {
     try {
@@ -55,11 +56,6 @@ userProfileRouter.post('/follow', async (req, res) => {
     res.status(500).send('Internal server error.');
   }
 });
-userProfileRouter.get('/:userId',userProfileController.getProfileByUserId);
 
-
-
-
-
-
+// userProfileRouter.get('/:userId',userProfileController.getProfileByUserId);
 export default  userProfileRouter ;

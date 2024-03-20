@@ -25,15 +25,11 @@ io.on('connection', (socket) => {
     console.log(userId + ' joining Room:', data);
     socket.join(data);
   });
-  //send message to the specific room
-  socket.on('chatMessage', (data) => {
-    console.log('Send message:', data);
-    io.to(data.chatRoomID).emit('receiveMessage', data);
+  // Send message to the specific room
+  socket.on('sendMessage', (data) => {
+    console.log('Object:', data);
+    io.to(data.messageListId).emit('receiveMessage', data); // Emit the message content only
   });
-  //receive message from the specific room
-    socket.on('receiveMessage', (data) => {
-        console.log('Receive message:', data);
-    });
 });
 
 export default server;

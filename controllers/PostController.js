@@ -146,4 +146,25 @@ async function addPostComment(req, res) {
   }
 }
 
-export { createPost, getPosts, getPostReports, getPostByID, addPostComment };
+async function likePost(req, res) {
+  try {
+    const response = await Post.findByIdAndUpdate(
+      { _id: req.params.id },
+      { $push: { likes: { userId: req.body.userId } } },
+      { new: true },
+    );
+    if (response) {
+      res.status(200).json({
+        status: 'success',
+        data: response,
+      });
+    }
+  } catch (e) {
+    res.status(500).json({
+      status: 'fail',
+      message: e.toString(),
+    });
+  }
+}
+
+export { createPost, getPosts, getPostReports, getPostByID, addPostComment, likePost };
