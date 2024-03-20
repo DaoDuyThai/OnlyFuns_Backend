@@ -55,7 +55,7 @@ userProfileRouter.post('/follow', async (req, res) => {
     res.status(500).send('Internal server error.');
   }
 });
-
+userProfileRouter.get('/:userId',userProfileController.getProfileByUserId);
 
 
 

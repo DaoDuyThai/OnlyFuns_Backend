@@ -1,5 +1,4 @@
 import { userProfileRepository } from '../repository/index.js';
-import UserProfile from '../models/UserProfile.js';
 
 /**
  * @des get members includes 2 collections User&UserProfile
@@ -19,7 +18,6 @@ const getMembers = async (req, res) => {
     });
   }
 };
-
 const getUserProfile = async (req, res) => {
   const userId = req.params.id;
   try {
@@ -35,4 +33,25 @@ const getUserProfile = async (req, res) => {
     });
   }
 };
-export default { getMembers, getUserProfile };
+/**
+ * @des get user profile by user id
+ * @author Nguyen LD
+ * @date 15/3/2024
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+
+const getProfileByUserId = async (req, res) => {
+  try {
+    const result = await userProfileRepository.getProfileByUserId(
+      req.params.userId,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: error.toString(),
+    });
+  }
+};
+export default { getMembers, getUserProfile, getProfileByUserId };

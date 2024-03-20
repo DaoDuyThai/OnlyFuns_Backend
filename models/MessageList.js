@@ -1,5 +1,5 @@
-import mongoose, { Schema } from "mongoose";
-import User from "./User.js";
+import mongoose, { Schema } from 'mongoose';
+import User from './User.js';
 /**
  * @des
  * @author Bui Anh Hong
@@ -11,12 +11,12 @@ import User from "./User.js";
 const lastMessageSchema = new Schema(
   {
     content: {
-      type: String
+      type: String,
     },
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
 const messageListSchema = new Schema(
@@ -24,16 +24,16 @@ const messageListSchema = new Schema(
     participants: [
       {
         type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+        ref: 'User',
+        required: true,
       },
     ],
-    lastMessage:[lastMessageSchema],
+    lastMessage: [lastMessageSchema],
   },
   {
-    timestamps: true
-  }
+    timestamps: true,
+  },
 );
 
-const MessageList = mongoose.model("MessageList", messageListSchema);
+const MessageList = mongoose.model('MessageList', messageListSchema);
 export default MessageList;
