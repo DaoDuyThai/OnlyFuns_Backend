@@ -15,7 +15,7 @@ This repository contains the backend codebase for the OnlyFuns social media plat
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/DuyThaiddt/OnlyFuns_Backend
+git clone https://github.com/DaoDuyThai/OnlyFuns_Backend
 ```
 
 2. Install dependencies:
